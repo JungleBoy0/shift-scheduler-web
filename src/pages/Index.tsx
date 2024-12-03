@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { Card } from "@/components/ui/card";
 import { CalendarIcon } from "lucide-react";
+import { createEvents } from 'ics';
 
 const Index = () => {
   const { toast } = useToast();
@@ -34,31 +35,57 @@ const Index = () => {
       .map((d) => parseInt(d.trim()))
       .filter((d) => !isNaN(d));
 
-    // Create CSV content
-    let csvContent = "Subject,Start Date,Start Time,End Date,End Time,Description,Location\n";
+    const events = [];
 
     // Add day shifts
     dayDates.forEach((day) => {
-      csvContent += `"Day Shift",${year}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")},07:00,${year}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")},19:00,"Schedule: ${name}",\n`;
+      const date = new Date(year, month - 1, day);
+      events.push({
+        start: [year, month, day, 7, 0],
+        end: [year, month, day, 19, 0],
+        title: "Day Shift",
+        description: `Schedule: ${name}`,
+        calName: "Work Schedule",
+      });
     });
 
     // Add night shifts
     nightDates.forEach((day) => {
-      csvContent += `"Night Shift",${year}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")},19:00,${year}-${month.toString().padStart(2, "0")}-${(day + 1).toString().padStart(2, "0")},07:00,"Schedule: ${name}",\n`;
+      const date = new Date(year, month - 1, day);
+      const nextDay = new Date(date);
+      nextDay.setDate(nextDay.getDate() + 1);
+      
+      events.push({
+        start: [year, month, day, 19, 0],
+        end: [nextDay.getFullYear(), nextDay.getMonth() + 1, nextDay.getDate(), 7, 0],
+        title: "Night Shift",
+        description: `Schedule: ${name}`,
+        calName: "Work Schedule",
+      });
     });
 
-    // Create and download CSV file
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = `schedule_${name}_${year}_${month}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    createEvents(events, (error, value) => {
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to generate calendar file",
+          variant: "destructive",
+        });
+        return;
+      }
 
-    toast({
-      title: "Success",
-      description: "Calendar file has been generated and downloaded",
+      const blob = new Blob([value], { type: 'text/calendar;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `schedule_${name}_${year}_${month}.ics`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast({
+        title: "Success",
+        description: "Calendar file has been generated and downloaded",
+      });
     });
   };
 
