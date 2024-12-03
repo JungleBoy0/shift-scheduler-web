@@ -4,18 +4,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { Card } from "@/components/ui/card";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Download, Mail } from "lucide-react";
 import { createEvents } from 'ics';
+import emailjs from '@emailjs/browser';
 
 const Index = () => {
   const { toast } = useToast();
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [dayShifts, setDayShifts] = useState("");
   const [nightShifts, setNightShifts] = useState("");
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(new Date().getFullYear());
 
-  const generateCalendarFiles = () => {
+  const generateCalendarFiles = async (sendEmail = false) => {
     if (!name || (!dayShifts && !nightShifts)) {
       toast({
         title: "Error",
@@ -25,7 +27,15 @@ const Index = () => {
       return;
     }
 
-    // Parse comma-separated dates
+    if (sendEmail && !email) {
+      toast({
+        title: "Error",
+        description: "Please provide an email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const dayDates = dayShifts
       .split(",")
       .map((d) => parseInt(d.trim()))
@@ -37,7 +47,6 @@ const Index = () => {
 
     const events = [];
 
-    // Add day shifts
     dayDates.forEach((day) => {
       const date = new Date(year, month - 1, day);
       events.push({
@@ -49,7 +58,6 @@ const Index = () => {
       });
     });
 
-    // Add night shifts
     nightDates.forEach((day) => {
       const date = new Date(year, month - 1, day);
       const nextDay = new Date(date);
@@ -64,7 +72,7 @@ const Index = () => {
       });
     });
 
-    createEvents(events, (error, value) => {
+    createEvents(events, async (error, value) => {
       if (error) {
         toast({
           title: "Error",
@@ -74,18 +82,48 @@ const Index = () => {
         return;
       }
 
-      const blob = new Blob([value], { type: 'text/calendar;charset=utf-8' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = `schedule_${name}_${year}_${month}.ics`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      if (sendEmail) {
+        try {
+          const templateParams = {
+            to_email: email,
+            from_name: "Shift Scheduler",
+            to_name: name,
+            message: "Your schedule is attached",
+            attachment: value,
+          };
 
-      toast({
-        title: "Success",
-        description: "Calendar file has been generated and downloaded",
-      });
+          await emailjs.send(
+            'YOUR_SERVICE_ID', // Replace with your EmailJS service ID
+            'YOUR_TEMPLATE_ID', // Replace with your EmailJS template ID
+            templateParams,
+            'YOUR_PUBLIC_KEY' // Replace with your EmailJS public key
+          );
+
+          toast({
+            title: "Success",
+            description: "Schedule has been sent to your email",
+          });
+        } catch (err) {
+          toast({
+            title: "Error",
+            description: "Failed to send email",
+            variant: "destructive",
+          });
+        }
+      } else {
+        const blob = new Blob([value], { type: 'text/calendar;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `schedule_${name}_${year}_${month}.ics`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        toast({
+          title: "Success",
+          description: "Calendar file has been generated and downloaded",
+        });
+      }
     });
   };
 
@@ -108,6 +146,17 @@ const Index = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter employee name"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="email">Email (optional)</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter email address"
               />
             </div>
 
@@ -155,14 +204,24 @@ const Index = () => {
               />
             </div>
 
-            <Button
-              className="w-full"
-              onClick={generateCalendarFiles}
-              disabled={!name || (!dayShifts && !nightShifts)}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              Generate Calendar
-            </Button>
+            <div className="flex gap-4">
+              <Button
+                className="flex-1"
+                onClick={() => generateCalendarFiles(false)}
+                disabled={!name || (!dayShifts && !nightShifts)}
+              >
+                <Download className="mr-2 h-4 w-4" />
+                Download Calendar
+              </Button>
+              <Button
+                className="flex-1"
+                onClick={() => generateCalendarFiles(true)}
+                disabled={!name || !email || (!dayShifts && !nightShifts)}
+              >
+                <Mail className="mr-2 h-4 w-4" />
+                Send by Email
+              </Button>
+            </div>
           </div>
         </Card>
       </div>
