@@ -132,37 +132,37 @@ const Index = () => {
       <div className="max-w-md mx-auto">
         <Card className="p-6 space-y-6">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900">Shift Schedule Generator</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Stacja Wizyjna Grafik</h1>
             <p className="mt-2 text-sm text-gray-600">
-              Enter dates as comma-separated values (e.g., 1, 5, 10, 15)
+              Wprowadź zmiany po przecinku(e.g., 1, 5, 10, 15)
             </p>
           </div>
 
           <div className="space-y-4">
             <div>
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">Logacja</Label>
               <Input
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Enter employee name"
+                placeholder="Pogdaj logacje"
               />
             </div>
 
             <div>
-              <Label htmlFor="email">Email (optional)</Label>
+              <Label htmlFor="email">Email (opcjonalnie)</Label>
               <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter email address"
+                placeholder="Wprowadź adres email"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="month">Month</Label>
+                <Label htmlFor="month">Miesiąc</Label>
                 <Input
                   id="month"
                   type="number"
@@ -173,7 +173,7 @@ const Index = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="year">Year</Label>
+                <Label htmlFor="year">Rok</Label>
                 <Input
                   id="year"
                   type="number"
@@ -185,7 +185,7 @@ const Index = () => {
             </div>
 
             <div>
-              <Label htmlFor="dayShifts">Day Shifts (7:00 - 19:00)</Label>
+              <Label htmlFor="dayShifts">Zmiany Dzienne (7:00 - 19:00)</Label>
               <Input
                 id="dayShifts"
                 value={dayShifts}
@@ -195,7 +195,7 @@ const Index = () => {
             </div>
 
             <div>
-              <Label htmlFor="nightShifts">Night Shifts (19:00 - 7:00)</Label>
+              <Label htmlFor="nightShifts">Zmiany Nocne (19:00 - 7:00)</Label>
               <Input
                 id="nightShifts"
                 value={nightShifts}
