@@ -93,10 +93,10 @@ const Index = () => {
           };
 
           await emailjs.send(
-            'YOUR_SERVICE_ID', // Replace with your EmailJS service ID
-            'YOUR_TEMPLATE_ID', // Replace with your EmailJS template ID
+            'service_llllvkr', // Replace with your EmailJS service ID
+            'template_ty7ucjm', // Replace with your EmailJS template ID
             templateParams,
-            'YOUR_PUBLIC_KEY' // Replace with your EmailJS public key
+            '8mFf_0_APIqTSyTKb' // Replace with your EmailJS public key
           );
 
           toast({
@@ -190,7 +190,7 @@ const Index = () => {
                 id="dayShifts"
                 value={dayShifts}
                 onChange={(e) => setDayShifts(e.target.value)}
-                placeholder="Enter dates (e.g., 1, 5, 10)"
+                placeholder="Wpisz daty (e.g., 1, 5, 10)"
               />
             </div>
 
@@ -200,7 +200,7 @@ const Index = () => {
                 id="nightShifts"
                 value={nightShifts}
                 onChange={(e) => setNightShifts(e.target.value)}
-                placeholder="Enter dates (e.g., 2, 6, 11)"
+                placeholder="Wpisz daty (e.g., 2, 6, 11)"
               />
             </div>
 

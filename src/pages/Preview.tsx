@@ -29,7 +29,7 @@ const Preview = () => {
       <div className="max-w-4xl mx-auto space-y-8">
         <Card>
           <CardHeader>
-            <CardTitle>Schedule Preview</CardTitle>
+            <CardTitle>Podgląd grafiku</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -68,9 +68,9 @@ const Preview = () => {
                   </TableBody>
                 </Table>
               ) : email ? (
-                <p className="text-gray-500">No schedules found for this email.</p>
+                <p className="text-gray-500">Nie znaleziono zmian do tego adresu email.</p>
               ) : (
-                <p className="text-gray-500">Enter an email to view schedules.</p>
+                <p className="text-gray-500">Wpisz Email by wyświetlić zmiany.</p>
               )}
             </div>
           </CardContent>
