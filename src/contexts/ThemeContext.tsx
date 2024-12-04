@@ -12,12 +12,15 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
     const stored = localStorage.getItem('theme');
-    return (stored as Theme) || 'dark'; // Set dark as default
+    return (stored as Theme) || 'dark';
   });
 
   useEffect(() => {
+    const root = document.documentElement;
     localStorage.setItem('theme', theme);
-    document.documentElement.classList.toggle('dark', theme === 'dark');
+    root.classList.remove('light', 'dark');
+    root.classList.add(theme);
+    root.style.setProperty('--theme-transition', 'all 0.3s ease');
   }, [theme]);
 
   const toggleTheme = () => {

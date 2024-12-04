@@ -1,6 +1,5 @@
 import { NavigationMenu, NavigationMenuItem, NavigationMenuList } from "@/components/ui/navigation-menu";
 import { Link } from "react-router-dom";
-import { ThemeToggle } from "./ThemeToggle";
 import { Button } from "./ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -8,7 +7,7 @@ export function Navigation() {
   const { logout } = useAuth();
 
   return (
-    <NavigationMenu className="max-w-screen px-4 py-2 border-b flex justify-between items-center">
+    <NavigationMenu className="max-w-screen px-4 py-2 border-b flex justify-between items-center bg-background">
       <NavigationMenuList>
         <NavigationMenuItem>
           <Link to="/" className="px-4 py-2 hover:bg-accent rounded-md">
@@ -27,7 +26,6 @@ export function Navigation() {
         </NavigationMenuItem>
       </NavigationMenuList>
       <div className="flex items-center gap-4">
-        <ThemeToggle />
         <Button variant="outline" onClick={logout}>
           Logout
         </Button>
