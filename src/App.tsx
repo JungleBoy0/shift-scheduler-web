@@ -6,7 +6,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Navigation } from "./components/Navigation";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import { ThemeToggle } from "./components/ThemeToggle";
 import Index from "./pages/Index";
 import Preview from "./pages/Preview";
 import ScheduleEditor from "./pages/ScheduleEditor";
@@ -26,7 +25,6 @@ function AppRoutes() {
   return (
     <>
       {admin && <Navigation />}
-      <ThemeToggle />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
@@ -40,7 +38,7 @@ function AppRoutes() {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>
-      <ThemeProvider>
+      <ThemeProvider defaultTheme="dark">
         <AuthProvider>
           <TooltipProvider>
             <div className="min-h-screen bg-background text-foreground transition-colors duration-300">

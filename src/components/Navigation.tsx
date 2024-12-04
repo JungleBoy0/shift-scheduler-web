@@ -2,6 +2,7 @@ import { NavigationMenu, NavigationMenuItem, NavigationMenuList } from "@/compon
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { ThemeToggle } from "./ThemeToggle";
 
 export function Navigation() {
   const { logout } = useAuth();
@@ -26,6 +27,7 @@ export function Navigation() {
         </NavigationMenuItem>
       </NavigationMenuList>
       <div className="flex items-center gap-4">
+        <ThemeToggle />
         <Button variant="outline" onClick={logout}>
           Logout
         </Button>

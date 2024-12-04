@@ -9,10 +9,16 @@ type ThemeContextType = {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
+export function ThemeProvider({ 
+  children, 
+  defaultTheme = 'dark' 
+}: { 
+  children: React.ReactNode;
+  defaultTheme?: Theme;
+}) {
   const [theme, setTheme] = useState<Theme>(() => {
     const stored = localStorage.getItem('theme');
-    return (stored as Theme) || 'dark';
+    return (stored as Theme) || defaultTheme;
   });
 
   useEffect(() => {
@@ -20,7 +26,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('theme', theme);
     root.classList.remove('light', 'dark');
     root.classList.add(theme);
-    root.style.setProperty('--theme-transition', 'all 0.3s ease');
   }, [theme]);
 
   const toggleTheme = () => {
