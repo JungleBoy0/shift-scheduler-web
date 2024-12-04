@@ -123,7 +123,7 @@ const Index = () => {
           <div className="text-center">
             <h1 className="text-2xl font-bold ">Stacja Wizyjna Grafik</h1>
             <p className="mt-2 text-sm ">
-              Enter shifts separated by commas (e.g., 1, 5, 10, 15)
+             Wpisz zmiany po przecinkach (np. 1, ,5 , 10 , 15)
             </p>
           </div>
 
