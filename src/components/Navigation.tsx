@@ -15,6 +15,11 @@ export function Navigation() {
             Schedule Preview
           </Link>
         </NavigationMenuItem>
+        <NavigationMenuItem>
+          <Link to="/editor" className="px-4 py-2 hover:bg-accent rounded-md">
+            Schedule Editor
+          </Link>
+        </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>
   );
