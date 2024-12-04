@@ -22,6 +22,7 @@ export const CalendarActions = ({ onDownload, onEmailSend, calendarData, icsFile
 
   const saveToDatabase = async () => {
     const { error } = await supabase.from('schedules').insert({
+      id: crypto.randomUUID(), // Generate UUID here
       name: calendarData.name,
       email: calendarData.email,
       month: calendarData.month,

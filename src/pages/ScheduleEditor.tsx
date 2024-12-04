@@ -2,15 +2,23 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
-import { Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Pencil, Trash2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const ScheduleEditor = () => {
   const [email, setEmail] = useState("");
+  const [editingSchedule, setEditingSchedule] = useState<any>(null);
   const { toast } = useToast();
 
   const { data: schedules, isLoading, refetch } = useQuery({
@@ -47,6 +55,33 @@ const ScheduleEditor = () => {
       title: "Success",
       description: "Schedule deleted successfully",
     });
+    refetch();
+  };
+
+  const updateSchedule = async (id: string, updatedData: any) => {
+    const { error } = await supabase
+      .from('schedules')
+      .update({
+        name: updatedData.name,
+        day_shifts: updatedData.day_shifts,
+        night_shifts: updatedData.night_shifts,
+      })
+      .eq('id', id);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update schedule",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: "Schedule updated successfully",
+    });
+    setEditingSchedule(null);
     refetch();
   };
 
@@ -90,7 +125,62 @@ const ScheduleEditor = () => {
                         <TableCell>{schedule.month}/{schedule.year}</TableCell>
                         <TableCell>{schedule.day_shifts?.join(', ') || '-'}</TableCell>
                         <TableCell>{schedule.night_shifts?.join(', ') || '-'}</TableCell>
-                        <TableCell>
+                        <TableCell className="space-x-2">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setEditingSchedule(schedule)}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Edit Schedule</DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-4 py-4">
+                                <div className="space-y-2">
+                                  <Label>Name</Label>
+                                  <Input
+                                    value={editingSchedule?.name || ''}
+                                    onChange={(e) => setEditingSchedule({
+                                      ...editingSchedule,
+                                      name: e.target.value
+                                    })}
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label>Day Shifts (comma-separated)</Label>
+                                  <Input
+                                    value={editingSchedule?.day_shifts?.join(',') || ''}
+                                    onChange={(e) => setEditingSchedule({
+                                      ...editingSchedule,
+                                      day_shifts: e.target.value.split(',').map(s => s.trim())
+                                    })}
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label>Night Shifts (comma-separated)</Label>
+                                  <Input
+                                    value={editingSchedule?.night_shifts?.join(',') || ''}
+                                    onChange={(e) => setEditingSchedule({
+                                      ...editingSchedule,
+                                      night_shifts: e.target.value.split(',').map(s => s.trim())
+                                    })}
+                                  />
+                                </div>
+                                <Button 
+                                  className="w-full"
+                                  onClick={() => updateSchedule(editingSchedule.id, editingSchedule)}
+                                >
+                                  Save Changes
+                                </Button>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                          
                           <Button
                             variant="destructive"
                             size="sm"
