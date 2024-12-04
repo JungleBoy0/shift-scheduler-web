@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 type Admin = {
   uuid: string;
@@ -13,27 +13,30 @@ type Admin = {
 type AuthContextType = {
   admin: Admin | null;
   login: (login: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
+  logout: () => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [admin, setAdmin] = useState<Admin | null>(null);
+  const [admin, setAdmin] = useState<Admin | null>(() => {
+    const stored = localStorage.getItem('admin');
+    return stored ? JSON.parse(stored) : null;
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check for stored admin session
-    const storedAdmin = localStorage.getItem('admin');
-    if (storedAdmin) {
-      setAdmin(JSON.parse(storedAdmin));
+    if (admin) {
+      localStorage.setItem('admin', JSON.stringify(admin));
+    } else {
+      localStorage.removeItem('admin');
     }
-  }, []);
+  }, [admin]);
 
   const login = async (login: string, password: string) => {
     const { data, error } = await supabase
       .from('admins')
-      .select()
+      .select('*')
       .eq('login', login)
       .single();
 
@@ -48,20 +51,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error('Invalid credentials');
     }
 
-    const admin = {
+    setAdmin({
       uuid: data.uuid,
       name: data.name,
       login: data.login,
       permissions: data.permissions,
-    };
+    });
 
-    setAdmin(admin);
-    localStorage.setItem('admin', JSON.stringify(admin));
+    navigate('/');
   };
 
-  const logout = async () => {
+  const logout = () => {
     setAdmin(null);
-    localStorage.removeItem('admin');
     navigate('/login');
   };
 
