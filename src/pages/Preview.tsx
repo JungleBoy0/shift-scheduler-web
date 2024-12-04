@@ -16,7 +16,7 @@ const Preview = () => {
       const { data, error } = await supabase
         .from('schedules')
         .select('*')
-        .eq('email', email);
+        .eq('name', email);
       
       if (error) throw error;
       return data || [];
@@ -25,7 +25,7 @@ const Preview = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-8">
         <Card>
           <CardHeader>
