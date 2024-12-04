@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import bcrypt from "bcrypt";
 
 type Admin = {
   uuid: string;
@@ -40,9 +41,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error('Invalid credentials');
     }
 
-    // In a real app, you'd want to hash the password and compare with password_hash
-    // For now, we're comparing directly (NOT SECURE - just for demo)
-    if (data.password_hash !== password) {
+    // Compare the provided password with the stored hash
+    const isValidPassword = await bcrypt.compare(password, data.password_hash);
+    
+    if (!isValidPassword) {
       throw new Error('Invalid credentials');
     }
 
