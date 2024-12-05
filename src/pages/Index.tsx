@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { createEvents } from 'ics';
-import emailjs from '@emailjs/browser';
 import { ScheduleForm } from "@/components/schedule/ScheduleForm";
 import { CalendarActions } from "@/components/schedule/CalendarActions";
 import { useToast } from "@/components/ui/use-toast";
@@ -84,38 +83,6 @@ const Index = () => {
     });
   };
 
-  const handleEmailSend = async () => {
-    if (!icsContent || !currentData.email) return;
-
-    try {
-      const templateParams = {
-        to_email: currentData.email,
-        from_name: "Generator Grafików",
-        to_name: currentData.name,
-        message: "Twój grafik jest w załączniku",
-        attachment: icsContent,
-      };
-
-      await emailjs.send(
-        'service_llllvkr',
-        'template_ty7ucjm',
-        templateParams,
-        '8mFf_0_APIqTSyTKb'
-      );
-
-      toast({
-        title: "Sukces",
-        description: "Grafik został wysłany na twój email",
-      });
-    } catch (err) {
-      toast({
-        title: "Błąd",
-        description: "Nie udało się wysłać emaila",
-        variant: "destructive",
-      });
-    }
-  };
-
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto">
@@ -132,7 +99,6 @@ const Index = () => {
           {currentData && (
             <CalendarActions
               onDownload={handleDownload}
-              onEmailSend={handleEmailSend}
               calendarData={currentData}
               icsFileContent={icsContent}
             />

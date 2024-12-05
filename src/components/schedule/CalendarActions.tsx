@@ -1,11 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { Download, Mail, Phone } from "lucide-react";
+import { Download, Phone } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 
 interface CalendarActionsProps {
   onDownload: () => void;
-  onEmailSend: () => void;
   calendarData: {
     name: string;
     email: string;
@@ -17,7 +16,7 @@ interface CalendarActionsProps {
   icsFileContent?: string;
 }
 
-export const CalendarActions = ({ onDownload, onEmailSend, calendarData, icsFileContent }: CalendarActionsProps) => {
+export const CalendarActions = ({ onDownload, calendarData, icsFileContent }: CalendarActionsProps) => {
   const { toast } = useToast();
 
   const saveToDatabase = async () => {
@@ -91,15 +90,6 @@ export const CalendarActions = ({ onDownload, onEmailSend, calendarData, icsFile
       >
         <Download className="mr-2 h-4 w-4" />
         Pobierz Kalendarz
-      </Button>
-      
-      <Button
-        className="flex-1"
-        onClick={() => handleAction(onEmailSend)}
-        disabled={!calendarData.name || !calendarData.email}
-      >
-        <Mail className="mr-2 h-4 w-4" />
-        Wyślij Email
       </Button>
 
       {icsFileContent && (
