@@ -30,8 +30,8 @@ export const ScheduleForm = ({ onGenerateCalendar }: ScheduleFormProps) => {
     
     if (!name || (!dayShifts && !nightShifts)) {
       toast({
-        title: "Error",
-        description: "Please fill in at least the name and one shift type",
+        title: "Błąd",
+        description: "Proszę wypełnić przynajmniej logację i jeden typ zmian",
         variant: "destructive",
       });
       return;
@@ -50,29 +50,29 @@ export const ScheduleForm = ({ onGenerateCalendar }: ScheduleFormProps) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <Label htmlFor="name">Location</Label>
+        <Label htmlFor="name">Logacja</Label>
         <Input
           id="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Enter location"
+          placeholder="Wprowadź logację"
         />
       </div>
 
       <div>
-        <Label htmlFor="email">Email (optional)</Label>
+        <Label htmlFor="email">Email (opcjonalnie)</Label>
         <Input
           id="email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="Enter email address"
+          placeholder="Wprowadź adres email"
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="month">Month</Label>
+          <Label htmlFor="month">Miesiąc</Label>
           <Input
             id="month"
             type="number"
@@ -83,7 +83,7 @@ export const ScheduleForm = ({ onGenerateCalendar }: ScheduleFormProps) => {
           />
         </div>
         <div>
-          <Label htmlFor="year">Year</Label>
+          <Label htmlFor="year">Rok</Label>
           <Input
             id="year"
             type="number"
@@ -95,27 +95,27 @@ export const ScheduleForm = ({ onGenerateCalendar }: ScheduleFormProps) => {
       </div>
 
       <div>
-        <Label htmlFor="dayShifts">Day Shifts (7:00 - 19:00)</Label>
+        <Label htmlFor="dayShifts">Zmiany dzienne (7:00 - 19:00)</Label>
         <Input
           id="dayShifts"
           value={dayShifts}
           onChange={(e) => setDayShifts(e.target.value)}
-          placeholder="Enter dates (e.g., 1, 5, 10)"
+          placeholder="Wprowadź daty (np. 1, 5, 10)"
         />
       </div>
 
       <div>
-        <Label htmlFor="nightShifts">Night Shifts (19:00 - 7:00)</Label>
+        <Label htmlFor="nightShifts">Zmiany nocne (19:00 - 7:00)</Label>
         <Input
           id="nightShifts"
           value={nightShifts}
           onChange={(e) => setNightShifts(e.target.value)}
-          placeholder="Enter dates (e.g., 2, 6, 11)"
+          placeholder="Wprowadź daty (np. 2, 6, 11)"
         />
       </div>
 
       <Button type="submit" className="w-full">
-        Generate Schedule
+        Generuj Grafik
       </Button>
     </form>
   );

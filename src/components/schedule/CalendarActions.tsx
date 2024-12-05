@@ -22,7 +22,7 @@ export const CalendarActions = ({ onDownload, onEmailSend, calendarData, icsFile
 
   const saveToDatabase = async () => {
     const { error } = await supabase.from('schedules').insert({
-      id: crypto.randomUUID(), // Generate UUID here
+      id: crypto.randomUUID(),
       name: calendarData.name,
       email: calendarData.email,
       month: calendarData.month,
@@ -33,16 +33,16 @@ export const CalendarActions = ({ onDownload, onEmailSend, calendarData, icsFile
 
     if (error) {
       toast({
-        title: "Error",
-        description: "Failed to save schedule to database",
+        title: "Błąd",
+        description: "Nie udało się zapisać grafiku w bazie danych",
         variant: "destructive",
       });
       return;
     }
 
     toast({
-      title: "Success",
-      description: "Schedule saved to database",
+      title: "Sukces",
+      description: "Grafik został zapisany w bazie danych",
     });
   };
 
@@ -51,11 +51,35 @@ export const CalendarActions = ({ onDownload, onEmailSend, calendarData, icsFile
     action();
   };
 
-  const generateCalendarUrl = () => {
-    if (!icsFileContent) return "";
-    
-    const blob = new Blob([icsFileContent], { type: 'text/calendar;charset=utf-8' });
-    return URL.createObjectURL(blob);
+  const saveCalendarToServer = async () => {
+    if (!icsFileContent) return;
+
+    try {
+      const filename = `${calendarData.name}_${calendarData.month}_${calendarData.year}.ics`;
+      const response = await fetch('/api/save-calendar', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: icsFileContent,
+          filename: filename,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to save calendar');
+
+      toast({
+        title: "Sukces",
+        description: "Kalendarz został zapisany na serwerze",
+      });
+    } catch (error) {
+      toast({
+        title: "Błąd",
+        description: "Nie udało się zapisać kalendarza na serwerze",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -66,7 +90,7 @@ export const CalendarActions = ({ onDownload, onEmailSend, calendarData, icsFile
         disabled={!calendarData.name}
       >
         <Download className="mr-2 h-4 w-4" />
-        Download Calendar
+        Pobierz Kalendarz
       </Button>
       
       <Button
@@ -75,25 +99,16 @@ export const CalendarActions = ({ onDownload, onEmailSend, calendarData, icsFile
         disabled={!calendarData.name || !calendarData.email}
       >
         <Mail className="mr-2 h-4 w-4" />
-        Send by Email
+        Wyślij Email
       </Button>
 
       {icsFileContent && (
         <Button
           className="flex-1"
-          onClick={() => {
-            const url = generateCalendarUrl();
-            if (url) {
-              window.open(url, '_blank');
-              toast({
-                title: "Calendar Link Generated",
-                description: "Open this link on your phone to sync with your calendar",
-              });
-            }
-          }}
+          onClick={saveCalendarToServer}
         >
           <Phone className="mr-2 h-4 w-4" />
-          Sync with Phone
+          Synchronizuj z Telefonem
         </Button>
       )}
     </div>

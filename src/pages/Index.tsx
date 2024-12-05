@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { createEvents } from 'ics';
 import emailjs from '@emailjs/browser';
 import { ScheduleForm } from "@/components/schedule/ScheduleForm";
@@ -28,9 +28,9 @@ const Index = () => {
       events.push({
         start: [formData.year, formData.month, day, 7, 0],
         end: [formData.year, formData.month, day, 19, 0],
-        title: "Day Shift",
-        description: `Schedule: ${formData.name}`,
-        calName: "Work Schedule",
+        title: "Zmiana Dzienna",
+        description: `Grafik: ${formData.name}`,
+        calName: "Grafik Pracy",
       });
     });
 
@@ -42,17 +42,17 @@ const Index = () => {
       events.push({
         start: [formData.year, formData.month, day, 19, 0],
         end: [nextDay.getFullYear(), nextDay.getMonth() + 1, nextDay.getDate(), 7, 0],
-        title: "Night Shift",
-        description: `Schedule: ${formData.name}`,
-        calName: "Work Schedule",
+        title: "Zmiana Nocna",
+        description: `Grafik: ${formData.name}`,
+        calName: "Grafik Pracy",
       });
     });
 
     createEvents(events, (error, value) => {
       if (error) {
         toast({
-          title: "Error",
-          description: "Failed to generate calendar file",
+          title: "Błąd",
+          description: "Nie udało się wygenerować pliku kalendarza",
           variant: "destructive",
         });
         return;
@@ -73,14 +73,14 @@ const Index = () => {
     const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `schedule_${currentData.name}_${currentData.year}_${currentData.month}.ics`;
+    link.download = `grafik_${currentData.name}_${currentData.year}_${currentData.month}.ics`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
     toast({
-      title: "Success",
-      description: "Calendar file has been generated and downloaded",
+      title: "Sukces",
+      description: "Plik kalendarza został wygenerowany i pobrany",
     });
   };
 
@@ -90,9 +90,9 @@ const Index = () => {
     try {
       const templateParams = {
         to_email: currentData.email,
-        from_name: "Shift Scheduler",
+        from_name: "Generator Grafików",
         to_name: currentData.name,
-        message: "Your schedule is attached",
+        message: "Twój grafik jest w załączniku",
         attachment: icsContent,
       };
 
@@ -104,13 +104,13 @@ const Index = () => {
       );
 
       toast({
-        title: "Success",
-        description: "Schedule has been sent to your email",
+        title: "Sukces",
+        description: "Grafik został wysłany na twój email",
       });
     } catch (err) {
       toast({
-        title: "Error",
-        description: "Failed to send email",
+        title: "Błąd",
+        description: "Nie udało się wysłać emaila",
         variant: "destructive",
       });
     }
@@ -121,9 +121,9 @@ const Index = () => {
       <div className="max-w-md mx-auto">
         <Card className="p-6 space-y-6">
           <div className="text-center">
-            <h1 className="text-2xl font-bold ">Stacja Wizyjna Grafik</h1>
-            <p className="mt-2 text-sm ">
-             Wpisz zmiany po przecinkach (np. 1, ,5 , 10 , 15)
+            <h1 className="text-2xl font-bold">Stacja Wizyjna Grafik</h1>
+            <p className="mt-2 text-sm">
+              Wpisz zmiany po przecinkach (np. 1, 5, 10, 15)
             </p>
           </div>
 

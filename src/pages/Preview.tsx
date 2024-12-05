@@ -7,21 +7,21 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 
 const Preview = () => {
-  const [email, setEmail] = useState("");
+  const [searchLocation, setSearchLocation] = useState("");
 
   const { data: schedules, isLoading } = useQuery({
-    queryKey: ['schedules', email],
+    queryKey: ['schedules', searchLocation],
     queryFn: async () => {
-      if (!email) return [];
+      if (!searchLocation) return [];
       const { data, error } = await supabase
         .from('schedules')
         .select('*')
-        .eq('name', email);
+        .eq('name', searchLocation);
       
       if (error) throw error;
       return data || [];
     },
-    enabled: !!email,
+    enabled: !!searchLocation,
   });
 
   return (
@@ -34,26 +34,25 @@ const Preview = () => {
           <CardContent>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="searchLocation">Logacja</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="searchLocation"
+                  placeholder="Wprowadź logację"
+                  value={searchLocation}
+                  onChange={(e) => setSearchLocation(e.target.value)}
                 />
               </div>
 
               {isLoading ? (
-                <p className="text-gray-500">Loading schedules...</p>
+                <p className="text-gray-500">Ładowanie grafików...</p>
               ) : schedules && schedules.length > 0 ? (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Month/Year</TableHead>
-                      <TableHead>Day Shifts</TableHead>
-                      <TableHead>Night Shifts</TableHead>
+                      <TableHead>Logacja</TableHead>
+                      <TableHead>Miesiąc/Rok</TableHead>
+                      <TableHead>Zmiany Dzienne</TableHead>
+                      <TableHead>Zmiany Nocne</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -67,10 +66,10 @@ const Preview = () => {
                     ))}
                   </TableBody>
                 </Table>
-              ) : email ? (
-                <p className="text-gray-500">Nie znaleziono zmian do tego adresu email.</p>
+              ) : searchLocation ? (
+                <p className="text-gray-500">Nie znaleziono grafików dla tej logacji.</p>
               ) : (
-                <p className="text-gray-500">Wpisz Email by wyświetlić zmiany.</p>
+                <p className="text-gray-500">Wprowadź logację aby wyświetlić grafiki.</p>
               )}
             </div>
           </CardContent>
