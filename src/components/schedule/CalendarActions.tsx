@@ -57,7 +57,7 @@ export const CalendarActions = ({ onDownload, calendarData, icsFileContent }: Ca
 
     try {
       const filename = `${calendarData.name}_${calendarData.month}_${calendarData.year}.ics`;
-      const filePath = path.join('/var/www/schedules/dist/calendars', filename);
+      const filePath = path.join('/calendars', filename);
 
       // Write file to server
       fs.writeFileSync(filePath, icsFileContent);
@@ -77,7 +77,7 @@ export const CalendarActions = ({ onDownload, calendarData, icsFileContent }: Ca
   };
 
   return (
-    <div className="flex gap-4 mt-4">
+    <div className="flex flex-col sm:flex-row gap-4 mt-4">
       <Button
         className="flex-1"
         onClick={() => handleAction(onDownload)}
