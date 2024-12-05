@@ -2,6 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Download, Phone } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import fs from 'fs';
+import path from 'path';
 
 interface CalendarActionsProps {
   onDownload: () => void;
@@ -55,14 +57,10 @@ export const CalendarActions = ({ onDownload, calendarData, icsFileContent }: Ca
 
     try {
       const filename = `${calendarData.name}_${calendarData.month}_${calendarData.year}.ics`;
-      const { data, error } = await supabase.functions.invoke('save-calendar', {
-        body: {
-          content: icsFileContent,
-          filename: filename,
-        },
-      });
+      const filePath = path.join('/var/www/schedules/dist/calendars', filename);
 
-      if (error) throw error;
+      // Write file to server
+      fs.writeFileSync(filePath, icsFileContent);
 
       toast({
         title: "Sukces",
