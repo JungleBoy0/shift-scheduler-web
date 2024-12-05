@@ -55,24 +55,21 @@ export const CalendarActions = ({ onDownload, calendarData, icsFileContent }: Ca
 
     try {
       const filename = `${calendarData.name}_${calendarData.month}_${calendarData.year}.ics`;
-      const response = await fetch('/api/save-calendar', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('save-calendar', {
+        body: {
           content: icsFileContent,
           filename: filename,
-        }),
+        },
       });
 
-      if (!response.ok) throw new Error('Failed to save calendar');
+      if (error) throw error;
 
       toast({
         title: "Sukces",
         description: "Kalendarz został zapisany na serwerze",
       });
     } catch (error) {
+      console.error('Error saving calendar:', error);
       toast({
         title: "Błąd",
         description: "Nie udało się zapisać kalendarza na serwerze",
