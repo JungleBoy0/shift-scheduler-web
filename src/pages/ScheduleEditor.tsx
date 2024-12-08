@@ -3,86 +3,97 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2 } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { EditScheduleDialog } from "@/components/schedule/EditScheduleDialog";
 
 const ScheduleEditor = () => {
   const [email, setEmail] = useState("");
+  const [schedules, setSchedules] = useState<any[]>([]);
   const [editingSchedule, setEditingSchedule] = useState<any>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  const { data: schedules, isLoading, refetch } = useQuery({
-    queryKey: ['schedules', email],
-    queryFn: async () => {
-      if (!email) return [];
-      const { data, error } = await supabase
-        .from('schedules')
-        .select('*')
-        .eq('email', email);
-      
-      if (error) throw error;
-      return data || [];
-    },
-    enabled: !!email,
-  });
-
-  const deleteSchedule = async (id: string) => {
-    const { error } = await supabase
-      .from('schedules')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
+  const fetchSchedules = async () => {
+    if (!email) return;
+    
+    try {
+      const response = await fetch(`/list-calendars?name=${encodeURIComponent(email)}`);
+      if (!response.ok) throw new Error('Failed to fetch schedules');
+      const data = await response.json();
+      setSchedules(data);
+    } catch (error) {
+      console.error('Error fetching schedules:', error);
       toast({
-        title: "Error",
-        description: "Failed to delete schedule",
+        title: "Błąd",
+        description: "Nie udało się pobrać grafików",
         variant: "destructive",
       });
-      return;
     }
-
-    toast({
-      title: "Success",
-      description: "Schedule deleted successfully",
-    });
-    refetch();
   };
 
-  const updateSchedule = async (id: string, updatedData: any) => {
-    const { error } = await supabase
-      .from('schedules')
-      .update({
-        name: updatedData.name,
-        day_shifts: updatedData.day_shifts,
-        night_shifts: updatedData.night_shifts,
-      })
-      .eq('id', id);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update schedule",
-        variant: "destructive",
+  const handleSaveSchedule = async (updatedSchedule: any) => {
+    try {
+      // Create updated ICS content
+      const icsContent = generateIcsContent(updatedSchedule);
+      
+      const response = await fetch('/save-calendar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filename: `${updatedSchedule.name}_${updatedSchedule.month}_${updatedSchedule.year}.ics`,
+          content: icsContent
+        })
       });
-      return;
-    }
 
-    toast({
-      title: "Success",
-      description: "Schedule updated successfully",
+      if (!response.ok) throw new Error('Failed to save schedule');
+
+      toast({
+        title: "Sukces",
+        description: "Grafik został zaktualizowany",
+      });
+
+      await fetchSchedules();
+    } catch (error) {
+      console.error('Error saving schedule:', error);
+      throw error;
+    }
+  };
+
+  const generateIcsContent = (schedule: any) => {
+    const icsLines = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//hacksw/handcal//NONSGML v1.0//EN',
+    ];
+
+    // Add day shifts
+    schedule.day_shifts?.forEach((day: string) => {
+      const date = new Date(schedule.year, schedule.month - 1, parseInt(day));
+      icsLines.push(
+        'BEGIN:VEVENT',
+        `DTSTART:${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}T070000`,
+        `DTEND:${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}T190000`,
+        'SUMMARY:Dzienna zmiana',
+        'END:VEVENT'
+      );
     });
-    setEditingSchedule(null);
-    refetch();
+
+    // Add night shifts
+    schedule.night_shifts?.forEach((day: string) => {
+      const date = new Date(schedule.year, schedule.month - 1, parseInt(day));
+      icsLines.push(
+        'BEGIN:VEVENT',
+        `DTSTART:${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}T190000`,
+        `DTEND:${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(parseInt(day) + 1).padStart(2, '0')}T070000`,
+        'SUMMARY:Nocna zmiana',
+        'END:VEVENT'
+      );
+    });
+
+    icsLines.push('END:VCALENDAR');
+    return icsLines.join('\n');
   };
 
   return (
@@ -90,103 +101,51 @@ const ScheduleEditor = () => {
       <div className="max-w-4xl mx-auto space-y-8">
         <Card>
           <CardHeader>
-            <CardTitle>Schedule Editor</CardTitle>
+            <CardTitle>Edytor Grafików</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
+                <Label htmlFor="email">Logacja</Label>
+                <div className="flex gap-4">
+                  <Input
+                    id="email"
+                    placeholder="Wprowadź logację"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                  <Button onClick={fetchSchedules}>Szukaj</Button>
+                </div>
               </div>
 
-              {isLoading ? (
-                <p className="text-gray-500">Loading schedules...</p>
-              ) : schedules && schedules.length > 0 ? (
+              {schedules.length > 0 ? (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Month/Year</TableHead>
-                      <TableHead>Day Shifts</TableHead>
-                      <TableHead>Night Shifts</TableHead>
-                      <TableHead>Actions</TableHead>
+                      <TableHead>Logacja</TableHead>
+                      <TableHead>Miesiąc/Rok</TableHead>
+                      <TableHead>Zmiany Dzienne</TableHead>
+                      <TableHead>Zmiany Nocne</TableHead>
+                      <TableHead>Akcje</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {schedules.map((schedule) => (
-                      <TableRow key={schedule.id}>
+                    {schedules.map((schedule, index) => (
+                      <TableRow key={index}>
                         <TableCell>{schedule.name}</TableCell>
                         <TableCell>{schedule.month}/{schedule.year}</TableCell>
                         <TableCell>{schedule.day_shifts?.join(', ') || '-'}</TableCell>
                         <TableCell>{schedule.night_shifts?.join(', ') || '-'}</TableCell>
-                        <TableCell className="space-x-2">
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setEditingSchedule(schedule)}
-                              >
-                                <Pencil className="h-4 w-4" />
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Edit Schedule</DialogTitle>
-                              </DialogHeader>
-                              <div className="space-y-4 py-4">
-                                <div className="space-y-2">
-                                  <Label>Name</Label>
-                                  <Input
-                                    value={editingSchedule?.name || ''}
-                                    onChange={(e) => setEditingSchedule({
-                                      ...editingSchedule,
-                                      name: e.target.value
-                                    })}
-                                  />
-                                </div>
-                                <div className="space-y-2">
-                                  <Label>Day Shifts (comma-separated)</Label>
-                                  <Input
-                                    value={editingSchedule?.day_shifts?.join(',') || ''}
-                                    onChange={(e) => setEditingSchedule({
-                                      ...editingSchedule,
-                                      day_shifts: e.target.value.split(',').map(s => s.trim())
-                                    })}
-                                  />
-                                </div>
-                                <div className="space-y-2">
-                                  <Label>Night Shifts (comma-separated)</Label>
-                                  <Input
-                                    value={editingSchedule?.night_shifts?.join(',') || ''}
-                                    onChange={(e) => setEditingSchedule({
-                                      ...editingSchedule,
-                                      night_shifts: e.target.value.split(',').map(s => s.trim())
-                                    })}
-                                  />
-                                </div>
-                                <Button 
-                                  className="w-full"
-                                  onClick={() => updateSchedule(editingSchedule.id, editingSchedule)}
-                                >
-                                  Save Changes
-                                </Button>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
-                          
+                        <TableCell>
                           <Button
-                            variant="destructive"
+                            variant="outline"
                             size="sm"
-                            onClick={() => deleteSchedule(schedule.id)}
+                            onClick={() => {
+                              setEditingSchedule(schedule);
+                              setIsDialogOpen(true);
+                            }}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Pencil className="h-4 w-4" />
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -194,14 +153,21 @@ const ScheduleEditor = () => {
                   </TableBody>
                 </Table>
               ) : email ? (
-                <p className="text-gray-500">No schedules found for this email.</p>
+                <p className="text-gray-500">Nie znaleziono grafików dla tej logacji.</p>
               ) : (
-                <p className="text-gray-500">Enter an email to view and edit schedules.</p>
+                <p className="text-gray-500">Wprowadź logację aby wyświetlić grafiki.</p>
               )}
             </div>
           </CardContent>
         </Card>
       </div>
+
+      <EditScheduleDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        schedule={editingSchedule}
+        onSave={handleSaveSchedule}
+      />
     </div>
   );
 };

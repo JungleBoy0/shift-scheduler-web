@@ -1,28 +1,45 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+
+interface Schedule {
+  name: string;
+  month: number;
+  year: number;
+  day_shifts: string[];
+  night_shifts: string[];
+}
 
 const Preview = () => {
   const [searchLocation, setSearchLocation] = useState("");
+  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const { data: schedules, isLoading } = useQuery({
-    queryKey: ['schedules', searchLocation],
-    queryFn: async () => {
-      if (!searchLocation) return [];
-      const { data, error } = await supabase
-        .from('schedules')
-        .select('*')
-        .eq('name', searchLocation);
-      
-      if (error) throw error;
-      return data || [];
-    },
-    enabled: !!searchLocation,
-  });
+  useEffect(() => {
+    const fetchSchedules = async () => {
+      if (!searchLocation) {
+        setSchedules([]);
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const response = await fetch(`/list-calendars?name=${encodeURIComponent(searchLocation)}`);
+        if (!response.ok) throw new Error('Failed to fetch schedules');
+        const data = await response.json();
+        setSchedules(data);
+      } catch (error) {
+        console.error('Error fetching schedules:', error);
+        setSchedules([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSchedules();
+  }, [searchLocation]);
 
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
@@ -56,8 +73,8 @@ const Preview = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {schedules.map((schedule) => (
-                      <TableRow key={schedule.id}>
+                    {schedules.map((schedule, index) => (
+                      <TableRow key={index}>
                         <TableCell>{schedule.name}</TableCell>
                         <TableCell>{schedule.month}/{schedule.year}</TableCell>
                         <TableCell>{schedule.day_shifts?.join(', ') || '-'}</TableCell>

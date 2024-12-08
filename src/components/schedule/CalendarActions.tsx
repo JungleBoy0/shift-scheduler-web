@@ -1,9 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { Download, Phone } from "lucide-react";
+import { Phone } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface CalendarActionsProps {
-  onDownload: () => void;
   calendarData: {
     name: string;
     email: string;
@@ -15,7 +14,7 @@ interface CalendarActionsProps {
   icsFileContent?: string;
 }
 
-export const CalendarActions = ({ onDownload, calendarData, icsFileContent }: CalendarActionsProps) => {
+export const CalendarActions = ({ calendarData, icsFileContent }: CalendarActionsProps) => {
   const { toast } = useToast();
 
   const saveCalendarToServer = async () => {
@@ -56,19 +55,10 @@ export const CalendarActions = ({ onDownload, calendarData, icsFileContent }: Ca
   };
 
   return (
-    <div className="flex flex-col sm:flex-row gap-4 mt-4">
-      <Button
-        className="flex-1"
-        onClick={onDownload}
-        disabled={!calendarData.name}
-      >
-        <Download className="mr-2 h-4 w-4" />
-        Pobierz Kalendarz
-      </Button>
-
+    <div className="flex justify-center mt-4">
       {icsFileContent && (
         <Button
-          className="flex-1"
+          className="w-full sm:w-auto"
           onClick={saveCalendarToServer}
         >
           <Phone className="mr-2 h-4 w-4" />
