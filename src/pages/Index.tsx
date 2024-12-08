@@ -66,23 +66,6 @@ const Index = () => {
     });
   };
 
-  const handleDownload = () => {
-    if (!icsContent) return;
-
-    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `grafik_${currentData.name}_${currentData.year}_${currentData.month}.ics`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    toast({
-      title: "Sukces",
-      description: "Plik kalendarza został wygenerowany i pobrany",
-    });
-  };
-
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto">
@@ -98,7 +81,21 @@ const Index = () => {
           
           {currentData && (
             <CalendarActions
-              onDownload={handleDownload}
+              onDownload={() => {
+                if (!icsContent) return;
+                const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `grafik_${currentData.name}_${currentData.year}_${currentData.month}.ics`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                toast({
+                  title: "Sukces",
+                  description: "Plik kalendarza został wygenerowany i pobrany",
+                });
+              }}
               calendarData={currentData}
               icsFileContent={icsContent}
             />

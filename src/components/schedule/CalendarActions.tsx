@@ -1,9 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Download, Phone } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import fs from 'fs';
-import path from 'path';
 
 interface CalendarActionsProps {
   onDownload: () => void;
@@ -21,51 +18,33 @@ interface CalendarActionsProps {
 export const CalendarActions = ({ onDownload, calendarData, icsFileContent }: CalendarActionsProps) => {
   const { toast } = useToast();
 
-  const saveToDatabase = async () => {
-    const { error } = await supabase.from('schedules').insert({
-      id: crypto.randomUUID(),
-      name: calendarData.name,
-      email: calendarData.email,
-      month: calendarData.month,
-      year: calendarData.year,
-      day_shifts: calendarData.dayShifts,
-      night_shifts: calendarData.nightShifts,
-    });
-
-    if (error) {
-      toast({
-        title: "Błąd",
-        description: "Nie udało się zapisać grafiku w bazie danych",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    toast({
-      title: "Sukces",
-      description: "Grafik został zapisany w bazie danych",
-    });
-  };
-
-  const handleAction = async (action: () => void) => {
-    await saveToDatabase();
-    action();
-  };
-
   const saveCalendarToServer = async () => {
     if (!icsFileContent) return;
 
     try {
       const filename = `${calendarData.name}_${calendarData.month}_${calendarData.year}.ics`;
-      const filePath = path.join('/calendars', filename);
-
-      // Write file to server
-      fs.writeFileSync(filePath, icsFileContent);
-
-      toast({
-        title: "Sukces",
-        description: "Kalendarz został zapisany na serwerze",
+      
+      const response = await fetch('/save-calendar', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          filename,
+          content: icsFileContent
+        }),
       });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        toast({
+          title: "Sukces",
+          description: "Kalendarz został zapisany na serwerze",
+        });
+      } else {
+        throw new Error(data.message);
+      }
     } catch (error) {
       console.error('Error saving calendar:', error);
       toast({
@@ -80,7 +59,7 @@ export const CalendarActions = ({ onDownload, calendarData, icsFileContent }: Ca
     <div className="flex flex-col sm:flex-row gap-4 mt-4">
       <Button
         className="flex-1"
-        onClick={() => handleAction(onDownload)}
+        onClick={onDownload}
         disabled={!calendarData.name}
       >
         <Download className="mr-2 h-4 w-4" />

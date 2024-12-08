@@ -12,24 +12,24 @@ export function Navigation() {
       <NavigationMenuList>
         <NavigationMenuItem>
           <Link to="/" className="px-4 py-2 hover:bg-accent rounded-md">
-            Schedule Generator
+            Generator Grafiku
           </Link>
         </NavigationMenuItem>
         <NavigationMenuItem>
           <Link to="/preview" className="px-4 py-2 hover:bg-accent rounded-md">
-            Schedule Preview
+            Podgląd Grafiku
           </Link>
         </NavigationMenuItem>
         <NavigationMenuItem>
           <Link to="/editor" className="px-4 py-2 hover:bg-accent rounded-md">
-            Schedule Editor
+            Edytor Grafiku
           </Link>
         </NavigationMenuItem>
       </NavigationMenuList>
       <div className="flex items-center gap-4">
         <ThemeToggle />
         <Button variant="outline" onClick={logout}>
-          Logout
+          Wyloguj
         </Button>
       </div>
     </NavigationMenu>
