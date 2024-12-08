@@ -25,6 +25,11 @@ export function Navigation() {
             Edytor Grafiku
           </Link>
         </NavigationMenuItem>
+        <NavigationMenuItem>
+          <Link to="/full-schedule" className="px-4 py-2 hover:bg-accent rounded-md">
+            Pełny Grafik
+          </Link>
+        </NavigationMenuItem>
       </NavigationMenuList>
       <div className="flex items-center gap-4">
         <ThemeToggle />

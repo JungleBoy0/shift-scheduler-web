@@ -9,6 +9,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Index from "./pages/Index";
 import Preview from "./pages/Preview";
 import ScheduleEditor from "./pages/ScheduleEditor";
+import FullSchedule from "./pages/FullSchedule";
 import Login from "./pages/Login";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ function AppRoutes() {
         <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
         <Route path="/preview" element={<ProtectedRoute><Preview /></ProtectedRoute>} />
         <Route path="/editor" element={<ProtectedRoute><ScheduleEditor /></ProtectedRoute>} />
+        <Route path="/full-schedule" element={<ProtectedRoute><FullSchedule /></ProtectedRoute>} />
       </Routes>
     </>
   );

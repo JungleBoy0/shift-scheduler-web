@@ -63,26 +63,39 @@ const Preview = () => {
               {isLoading ? (
                 <p className="text-gray-500">Ładowanie grafików...</p>
               ) : schedules && schedules.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Logacja</TableHead>
-                      <TableHead>Miesiąc/Rok</TableHead>
-                      <TableHead>Zmiany Dzienne</TableHead>
-                      <TableHead>Zmiany Nocne</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {schedules.map((schedule, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{schedule.name}</TableCell>
-                        <TableCell>{schedule.month}/{schedule.year}</TableCell>
-                        <TableCell>{schedule.day_shifts?.join(', ') || '-'}</TableCell>
-                        <TableCell>{schedule.night_shifts?.join(', ') || '-'}</TableCell>
+                <>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Logacja</TableHead>
+                        <TableHead>Miesiąc/Rok</TableHead>
+                        <TableHead>Zmiany Dzienne</TableHead>
+                        <TableHead>Zmiany Nocne</TableHead>
+                        <TableHead>Link do kalendarza</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {schedules.map((schedule, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{schedule.name}</TableCell>
+                          <TableCell>{schedule.month}/{schedule.year}</TableCell>
+                          <TableCell>{schedule.day_shifts?.join(', ') || '-'}</TableCell>
+                          <TableCell>{schedule.night_shifts?.join(', ') || '-'}</TableCell>
+                          <TableCell>
+                            <a
+                              href={`http://20.215.224.183/calendars/${schedule.name}_${schedule.month}_${schedule.year}.ics`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-500 hover:text-blue-600"
+                            >
+                              Pobierz kalendarz
+                            </a>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </>
               ) : searchLocation ? (
                 <p className="text-gray-500">Nie znaleziono grafików dla tej logacji.</p>
               ) : (
