@@ -45,13 +45,30 @@ app.get('/list-calendars', (req, res) => {
         const dayShifts = [];
         const nightShifts = [];
         
-        content.split('\n').forEach(line => {
-          if (line.includes('SUMMARY:Dzienna')) {
-            const date = line.match(/(\d+)/);
-            if (date) dayShifts.push(date[1]);
-          } else if (line.includes('SUMMARY:Nocna')) {
-            const date = line.match(/(\d+)/);
-            if (date) nightShifts.push(date[1]);
+        const lines = content.split('\n');
+        let currentEvent = null;
+        
+        lines.forEach(line => {
+          if (line.startsWith('BEGIN:VEVENT')) {
+            currentEvent = {};
+          } else if (line.startsWith('DTSTART:')) {
+            if (currentEvent) {
+              const date = line.substring(8);
+              currentEvent.date = date.substring(6, 8); // Extract day from YYYYMMDD
+            }
+          } else if (line.startsWith('SUMMARY:')) {
+            if (currentEvent) {
+              currentEvent.type = line.includes('Dzienna') ? 'day' : 'night';
+            }
+          } else if (line.startsWith('END:VEVENT')) {
+            if (currentEvent) {
+              if (currentEvent.type === 'day') {
+                dayShifts.push(currentEvent.date);
+              } else {
+                nightShifts.push(currentEvent.date);
+              }
+            }
+            currentEvent = null;
           }
         });
 

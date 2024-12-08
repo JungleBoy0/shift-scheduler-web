@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import { useState, useEffect } from "react";
 
 interface EditScheduleDialogProps {
   open: boolean;
@@ -13,10 +14,24 @@ interface EditScheduleDialogProps {
 
 export const EditScheduleDialog = ({ open, onOpenChange, schedule, onSave }: EditScheduleDialogProps) => {
   const { toast } = useToast();
+  const [dayShifts, setDayShifts] = useState<string>('');
+  const [nightShifts, setNightShifts] = useState<string>('');
+
+  useEffect(() => {
+    if (schedule) {
+      setDayShifts(schedule.day_shifts?.join(',') || '');
+      setNightShifts(schedule.night_shifts?.join(',') || '');
+    }
+  }, [schedule]);
 
   const handleSave = async () => {
     try {
-      await onSave(schedule);
+      const updatedSchedule = {
+        ...schedule,
+        day_shifts: dayShifts.split(',').map(s => s.trim()).filter(s => s),
+        night_shifts: nightShifts.split(',').map(s => s.trim()).filter(s => s)
+      };
+      await onSave(updatedSchedule);
       onOpenChange(false);
     } catch (error) {
       toast({
@@ -39,15 +54,17 @@ export const EditScheduleDialog = ({ open, onOpenChange, schedule, onSave }: Edi
           <div className="space-y-2">
             <Label>Zmiany Dzienne (oddzielone przecinkami)</Label>
             <Input
-              value={schedule.day_shifts?.join(',') || ''}
-              onChange={(e) => schedule.day_shifts = e.target.value.split(',').map(s => s.trim())}
+              value={dayShifts}
+              onChange={(e) => setDayShifts(e.target.value)}
+              placeholder="np. 1,2,3,4"
             />
           </div>
           <div className="space-y-2">
             <Label>Zmiany Nocne (oddzielone przecinkami)</Label>
             <Input
-              value={schedule.night_shifts?.join(',') || ''}
-              onChange={(e) => schedule.night_shifts = e.target.value.split(',').map(s => s.trim())}
+              value={nightShifts}
+              onChange={(e) => setNightShifts(e.target.value)}
+              placeholder="np. 5,6,7,8"
             />
           </div>
           <Button 
