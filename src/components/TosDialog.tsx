@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const TosDialog = () => {
   const [open, setOpen] = useState(false);
-  const [rememberChoice, setRememberChoice] = useState(false);
+  const [agreedToTos, setAgreedToTos] = useState(false); // State for agreement checkbox
   const { admin } = useAuth();
 
   useEffect(() => {
@@ -35,8 +35,7 @@ export const TosDialog = () => {
     await supabase
       .from('tos_acceptance')
       .insert({
-        admin_id: admin.uuid,
-        remember_choice: rememberChoice
+        admin_id: admin.uuid
       });
 
     setOpen(false);
@@ -52,7 +51,7 @@ export const TosDialog = () => {
           <div className="space-y-4">
             <h2 className="text-lg font-bold">1. Wstęp</h2>
             <p>
-              Niniejszy Regulamin („Regulamin") określa zasady korzystania z usługi generatora harmonogramu („Usługa"),
+              Niniejszy Regulamin („Regulamin") określa zasady korzystania z usługi generatora harmonogramu („Usługa”),
               która umożliwia synchronizację harmonogramów z urządzeniami mobilnymi. Korzystając z Usługi, akceptujesz
               wszystkie warunki i zasady określone w tym Regulaminie. Jeśli nie zgadzasz się z warunkami, prosimy o
               niekorzystanie z Usługi.
@@ -145,15 +144,19 @@ export const TosDialog = () => {
         </ScrollArea>
         <div className="flex items-center space-x-2 mt-4">
           <Checkbox
-            id="remember"
-            checked={rememberChoice}
-            onCheckedChange={(checked) => setRememberChoice(checked as boolean)}
+            id="agree"
+            checked={agreedToTos}
+            onCheckedChange={(checked) => setAgreedToTos(checked as boolean)}
           />
-          <label htmlFor="remember" className="text-sm">
-            Zapamiętaj mój wybór
+          <label htmlFor="agree" className="text-sm">
+            Przeczytałem regulamin i zgadzam się z jego warunkami.
           </label>
         </div>
-        <Button onClick={handleAccept} className="w-full">
+        <Button 
+          onClick={handleAccept} 
+          className="w-full"
+          disabled={!agreedToTos} // Disable the button if the checkbox is not checked
+        >
           Akceptuję Regulamin
         </Button>
       </DialogContent>
