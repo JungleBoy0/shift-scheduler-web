@@ -16,6 +16,7 @@ export type Database = {
           name: string
           password_hash: string
           permissions: string
+          private_key: string
           uuid: string
         }
         Insert: {
@@ -24,6 +25,7 @@ export type Database = {
           name: string
           password_hash: string
           permissions: string
+          private_key: string
           uuid: string
         }
         Update: {
@@ -32,6 +34,7 @@ export type Database = {
           name?: string
           password_hash?: string
           permissions?: string
+          private_key?: string
           uuid?: string
         }
         Relationships: []
