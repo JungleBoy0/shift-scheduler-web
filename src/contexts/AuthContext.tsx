@@ -10,6 +10,14 @@ type Admin = {
   permissions: string;
 };
 
+type AdminResponse = {
+  uuid: string;
+  name: string;
+  login: string;
+  password_hash: string;
+  permissions: string;
+};
+
 type AuthContextType = {
   admin: Admin | null;
   login: (login: string, password: string) => Promise<void>;
@@ -37,7 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       // First, get the admin record using RPC to avoid exposing the REST endpoint
       const { data: adminData, error: adminError } = await supabase
-        .rpc('get_admin_by_login', { p_login: login });
+        .rpc<AdminResponse>('get_admin_by_login', { p_login: login });
 
       if (adminError || !adminData) {
         console.error('Login error:', adminError);
