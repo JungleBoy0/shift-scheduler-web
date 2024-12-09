@@ -118,6 +118,13 @@ app.get('/list-calendars', (req, res) => {
   }
 });
 
+// Catch-all handler for 404 errors
+app.use((req, res) => {
+  // This will redirect any undefined route to the home page ("/")
+  res.redirect('/');
+});
+
+// Start the server
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
