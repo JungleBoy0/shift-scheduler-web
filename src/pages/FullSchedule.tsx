@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { format, getDay, startOfMonth } from "date-fns";
+import { pl } from "date-fns/locale";
 
 interface Schedule {
   name: string;
@@ -49,6 +51,26 @@ const FullSchedule = () => {
     return new Date(year, month, 0).getDate();
   };
 
+  // Get day of week for a specific date
+  const getDayOfWeek = (day: number, month: number, year: number) => {
+    const date = new Date(year, month - 1, day);
+    const dayNames = ['N', 'PN', 'WT', 'ŚR', 'CZ', 'PT', 'S'];
+    return dayNames[getDay(date)];
+  };
+
+  // Calculate total hours for a schedule
+  const calculateTotalHours = (dayShifts: string[], nightShifts: string[]) => {
+    const totalShifts = (dayShifts?.length || 0) + (nightShifts?.length || 0);
+    return totalShifts * 12;
+  };
+
+  // Calculate total people for a specific day
+  const calculateTotalPeople = (day: string, schedules: Schedule[]) => {
+    const dayCount = schedules.filter(s => s.day_shifts?.includes(day.padStart(2, '0'))).length;
+    const nightCount = schedules.filter(s => s.night_shifts?.includes(day.padStart(2, '0'))).length;
+    return { dayCount, nightCount };
+  };
+
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -92,22 +114,45 @@ const FullSchedule = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Logacja</TableHead>
+                      <TableHead className="bg-muted">Logacja</TableHead>
+                      <TableHead className="bg-muted text-right">Godziny</TableHead>
                       {Array.from({ length: getDaysInMonth(parseInt(month), parseInt(year)) }, (_, i) => (
-                        <TableHead key={i + 1} className="text-center">{i + 1}</TableHead>
+                        <TableHead key={i + 1} className="text-center bg-muted">
+                          <div>{i + 1}</div>
+                          <div className="text-xs">
+                            {getDayOfWeek(i + 1, parseInt(month), parseInt(year))}
+                          </div>
+                          {(() => {
+                            const { dayCount, nightCount } = calculateTotalPeople(
+                              (i + 1).toString(),
+                              schedules
+                            );
+                            return dayCount || nightCount ? (
+                              <div className="text-xs">
+                                D:{dayCount} N:{nightCount}
+                              </div>
+                            ) : null;
+                          })()}
+                        </TableHead>
                       ))}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {schedules.map((schedule, index) => (
-                      <TableRow key={index}>
+                      <TableRow key={index} className="hover:bg-muted/50">
                         <TableCell className="font-medium">{schedule.name}</TableCell>
+                        <TableCell className="text-right">
+                          {calculateTotalHours(schedule.day_shifts, schedule.night_shifts)}h
+                        </TableCell>
                         {Array.from({ length: getDaysInMonth(parseInt(month), parseInt(year)) }, (_, i) => {
-                          const day = (i + 1).toString();
+                          const day = (i + 1).toString().padStart(2, '0');
                           const isDayShift = schedule.day_shifts?.includes(day);
                           const isNightShift = schedule.night_shifts?.includes(day);
                           return (
-                            <TableCell key={i + 1} className="text-center">
+                            <TableCell 
+                              key={i + 1} 
+                              className={`text-center ${isDayShift ? 'bg-blue-100 dark:bg-blue-900/30' : ''} ${isNightShift ? 'bg-purple-100 dark:bg-purple-900/30' : ''}`}
+                            >
                               {isDayShift && "D"}
                               {isNightShift && "N"}
                             </TableCell>

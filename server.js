@@ -1,6 +1,7 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const sanitize = require('sanitize-filename');
 const app = express();
 const port = 3000;
 
@@ -16,11 +17,40 @@ if (!fs.existsSync(calendarsDir)) {
   fs.mkdirSync(calendarsDir, { recursive: true });
 }
 
+// Validate ICS content
+const validateIcsContent = (content) => {
+  // Basic validation of ICS structure
+  const requiredFields = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'END:VCALENDAR'];
+  return requiredFields.every(field => content.includes(field)) &&
+         !content.includes('..') && // Prevent directory traversal
+         !content.includes('<script') && // Prevent XSS
+         content.length < 1000000; // Limit file size
+};
+
 // Handle calendar file saves
 app.post('/save-calendar', (req, res) => {
   try {
     const { filename, content } = req.body;
-    const filePath = path.join(calendarsDir, filename);
+    
+    // Sanitize filename and validate path
+    const sanitizedFilename = sanitize(filename);
+    if (!sanitizedFilename.endsWith('.ics')) {
+      throw new Error('Invalid file extension');
+    }
+
+    // Validate content
+    if (!validateIcsContent(content)) {
+      throw new Error('Invalid ICS content');
+    }
+
+    const filePath = path.join(calendarsDir, sanitizedFilename);
+    
+    // Ensure we're still in the calendars directory
+    const resolvedPath = path.resolve(filePath);
+    if (!resolvedPath.startsWith(path.resolve(calendarsDir))) {
+      throw new Error('Invalid file path');
+    }
+
     fs.writeFileSync(filePath, content);
     res.json({ success: true, message: 'Kalendarz został zapisany' });
   } catch (error) {

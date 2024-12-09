@@ -9,6 +9,38 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      activity_logs: {
+        Row: {
+          action_type: string
+          admin_id: string | null
+          created_at: string | null
+          details: Json | null
+          id: string
+        }
+        Insert: {
+          action_type: string
+          admin_id?: string | null
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+        }
+        Update: {
+          action_type?: string
+          admin_id?: string | null
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_logs_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "admins"
+            referencedColumns: ["uuid"]
+          },
+        ]
+      }
       admins: {
         Row: {
           date_of_creation: string | null
@@ -71,6 +103,35 @@ export type Database = {
           year?: number
         }
         Relationships: []
+      }
+      tos_acceptance: {
+        Row: {
+          accepted_at: string | null
+          admin_id: string | null
+          id: string
+          remember_choice: boolean | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          admin_id?: string | null
+          id?: string
+          remember_choice?: boolean | null
+        }
+        Update: {
+          accepted_at?: string | null
+          admin_id?: string | null
+          id?: string
+          remember_choice?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tos_acceptance_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "admins"
+            referencedColumns: ["uuid"]
+          },
+        ]
       }
     }
     Views: {
