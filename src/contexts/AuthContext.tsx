@@ -34,31 +34,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [admin]);
 
   const login = async (login: string, password: string) => {
-    const { data, error } = await supabase
-      .from('admins')
-      .select('*')
-      .eq('login', login)
-      .single();
+    try {
+      // First, get the admin record using RPC to avoid exposing the REST endpoint
+      const { data: adminData, error: adminError } = await supabase
+        .rpc('get_admin_by_login', { p_login: login });
 
-    if (error || !data) {
+      if (adminError || !adminData) {
+        console.error('Login error:', adminError);
+        throw new Error('Invalid credentials');
+      }
+
+      // Compare the provided password with the stored hash
+      const isValidPassword = await bcrypt.compare(password, adminData.password_hash);
+      
+      if (!isValidPassword) {
+        throw new Error('Invalid credentials');
+      }
+
+      setAdmin({
+        uuid: adminData.uuid,
+        name: adminData.name,
+        login: adminData.login,
+        permissions: adminData.permissions,
+      });
+
+      navigate('/');
+    } catch (error) {
+      console.error('Login error:', error);
       throw new Error('Invalid credentials');
     }
-
-    // Compare the provided password with the stored hash
-    const isValidPassword = await bcrypt.compare(password, data.password_hash);
-    
-    if (!isValidPassword) {
-      throw new Error('Invalid credentials');
-    }
-
-    setAdmin({
-      uuid: data.uuid,
-      name: data.name,
-      login: data.login,
-      permissions: data.permissions,
-    });
-
-    navigate('/');
   };
 
   const logout = () => {
