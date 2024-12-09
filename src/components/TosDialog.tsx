@@ -49,7 +49,6 @@ export const TosDialog = () => {
           <DialogTitle>Regulamin Usługi SchedFlow</DialogTitle>
         </DialogHeader>
         <ScrollArea className="h-[60vh] w-full rounded-md border p-4">
-          {/* TOS content */}
           <div className="space-y-4">
             <h2 className="text-lg font-bold">1. Wstęp</h2>
             <p>
@@ -58,8 +57,22 @@ export const TosDialog = () => {
               wszystkie warunki i zasady określone w tym Regulaminie. Jeśli nie zgadzasz się z warunkami, prosimy o 
               niekorzystanie z Usługi.
             </p>
-            
-            {/* ... Add the rest of the TOS content ... */}
+            <h2 className="text-lg font-bold">2. Korzystanie z Usługi</h2>
+            <p>
+              Użytkownik zobowiązuje się do korzystania z Usługi zgodnie z obowiązującym prawem oraz niniejszym Regulaminem.
+            </p>
+            <h2 className="text-lg font-bold">3. Odpowiedzialność</h2>
+            <p>
+              Usługodawca nie ponosi odpowiedzialności za jakiekolwiek szkody wynikłe z korzystania z Usługi.
+            </p>
+            <h2 className="text-lg font-bold">4. Zmiany w Regulaminie</h2>
+            <p>
+              Usługodawca zastrzega sobie prawo do wprowadzania zmian w Regulaminie. Użytkownik zostanie poinformowany o wszelkich zmianach.
+            </p>
+            <h2 className="text-lg font-bold">5. Kontakt</h2>
+            <p>
+              W przypadku pytań dotyczących Regulaminu, prosimy o kontakt z obsługą klienta.
+            </p>
           </div>
         </ScrollArea>
         <div className="flex items-center space-x-2 mt-4">

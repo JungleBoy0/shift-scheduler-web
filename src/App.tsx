@@ -1,6 +1,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Navigation } from "./components/Navigation";
@@ -49,6 +50,13 @@ function NotFound() {
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { admin } = useAuth();
   if (!admin) return <Navigate to="/login" />;
+  
+  // Check permissions for specific routes
+  const path = window.location.pathname;
+  if (admin.permissions === 'user' && (path === '/editor' || path === '/')) {
+    return <Navigate to="/preview" />;
+  }
+  
   return <>{children}</>;
 }
 
