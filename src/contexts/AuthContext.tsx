@@ -44,13 +44,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (login: string, password: string) => {
     try {
       // First, get the admin record using RPC to avoid exposing the REST endpoint
-      const { data: adminData, error: adminError } = await supabase
-        .rpc<AdminResponse>('get_admin_by_login', { p_login: login });
+      const { data: adminDataArray, error: adminError } = await supabase
+        .rpc<AdminResponse[], 'get_admin_by_login'>('get_admin_by_login', { p_login: login });
 
-      if (adminError || !adminData) {
+      if (adminError || !adminDataArray || adminDataArray.length === 0) {
         console.error('Login error:', adminError);
         throw new Error('Invalid credentials');
       }
+
+      const adminData = adminDataArray[0]; // Get the first (and should be only) result
 
       // Compare the provided password with the stored hash
       const isValidPassword = await bcrypt.compare(password, adminData.password_hash);
